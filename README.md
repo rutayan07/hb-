@@ -209,7 +209,14 @@ The quickest option is **Expo Go**:
 4. Tap **Continue with Google**. The redirect returns to Expo Go through
    `exp://<your-ip>:8081/--/auth/callback`, which is allowed by `exp://**`.
 
-If the phone cannot reach the computer, run `npx expo start --tunnel`.
+If the app does not load on the phone (different network, router isolation, or
+mobile data), use the tunnel instead. It works from any network:
+
+```bash
+npm run start:tunnel
+```
+
+On Android, scan the QR code from inside the Expo Go app, not the camera.
 
 To test the web build in a phone browser, run `npx expo start --web --host lan`
 and open `http://<your-computer-ip>:8081` on the phone.
