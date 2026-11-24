@@ -9,12 +9,16 @@ import {
   type PropsWithChildren,
 } from 'react';
 
-import { ALLOWED_DOMAIN, isSupabaseConfigured } from '../config/env';
+import {
+  ALLOWED_DOMAIN,
+  TEST_EMAILS,
+  isSupabaseConfigured,
+} from '../config/env';
 import { endSupabaseSession, startGoogleSignIn } from '../services/auth';
 import { fetchProfile } from '../services/profiles';
 import { supabase } from '../services/supabase';
 import type { AuthStatus, Profile, UserRole } from '../types/auth';
-import { isEmailFromDomain } from '../utils/domain';
+import { isEmailAllowed } from '../utils/domain';
 import {
   CONFIG_ERROR,
   DOMAIN_ERROR,
@@ -87,7 +91,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
     if (
       !isVerifiedGoogleUser(nextSession.user) ||
-      !isEmailFromDomain(nextSession.user.email, ALLOWED_DOMAIN)
+      !isEmailAllowed(nextSession.user.email, ALLOWED_DOMAIN, TEST_EMAILS)
     ) {
       setUser(null);
       setProfile(null);

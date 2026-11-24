@@ -10,18 +10,33 @@ create table if not exists public.profiles (
 
 alter table public.profiles enable row level security;
 
-create or replace function public.is_allowed_email(p_email text)
-returns boolean
-language sql
-immutable
-set search_path = ''
-as $$
-  select coalesce(lower(p_email), '') ~ '^[^@]+@hbplus\.fit$';
-$$;
-
 -- Kept outside the API-exposed public schema so it cannot be called over REST.
 create schema if not exists private;
 grant usage on schema private to authenticated;
+
+-- Individual non-domain accounts allowed for testing.
+create table if not exists private.allowed_test_emails (
+  email text primary key check (email = lower(email)),
+  note text,
+  created_at timestamptz not null default now()
+);
+
+revoke all on private.allowed_test_emails from public, anon, authenticated;
+grant select on private.allowed_test_emails to authenticated;
+
+create or replace function public.is_allowed_email(p_email text)
+returns boolean
+language sql
+stable
+set search_path = ''
+as $$
+  select coalesce(lower(p_email), '') ~ '^[^@]+@hbplus\.fit$'
+    or exists (
+      select 1
+      from private.allowed_test_emails as t
+      where t.email = lower(trim(p_email))
+    );
+$$;
 
 create or replace function private.is_admin()
 returns boolean

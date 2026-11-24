@@ -20,3 +20,23 @@ export function isEmailFromDomain(
 
   return parts[1] === normalizedDomain;
 }
+
+export function parseEmailList(value: string | null | undefined): string[] {
+  return (value ?? '')
+    .split(',')
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+export function isEmailAllowed(
+  email: string | null | undefined,
+  domain: string,
+  testEmails: readonly string[] = [],
+): boolean {
+  if (isEmailFromDomain(email, domain)) {
+    return true;
+  }
+
+  const normalizedEmail = email?.trim().toLowerCase();
+  return Boolean(normalizedEmail) && testEmails.includes(normalizedEmail!);
+}

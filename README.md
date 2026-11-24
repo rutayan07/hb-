@@ -393,3 +393,26 @@ Update the domain in both places:
 Domain checks in the app are exact matches, so `@hbplus.fit` does not allow
 `@mail.hbplus.fit`. Profiles from the old domain remain in the database but are
 no longer readable through RLS; remove or migrate them separately if needed.
+
+## Test accounts outside the domain
+
+For testing without a company account, individual addresses can be allowed.
+Every other non-domain account is still rejected. Add the address in both
+places:
+
+1. `.env` (comma-separated, exact matches only):
+
+   ```dotenv
+   EXPO_PUBLIC_TEST_EMAILS=tester@gmail.com
+   ```
+
+2. Supabase SQL Editor:
+
+   ```sql
+   insert into private.allowed_test_emails (email, note)
+   values ('tester@gmail.com', 'Test account');
+   ```
+
+Remove both entries to restore strict domain-only access. The `private` schema
+is not exposed through the Supabase API, so clients cannot read or modify the
+list.
