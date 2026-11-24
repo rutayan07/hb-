@@ -376,6 +376,13 @@ listed in Supabase's redirect URLs and that `scheme` in `app.json` is `hbplus`.
 If Supabase does not recognize the redirect URL, it falls back to the Site URL
 and the in-app browser stays open.
 
+**After Google sign-in the phone opens `localhost:3000`**
+
+Supabase did not accept the app's redirect URL and fell back to the Site URL
+(`http://localhost:3000` by default). Add `exp://**` and
+`hbplus://auth/callback` to the Redirect URLs, and set the Site URL to
+`http://localhost:8081`.
+
 **The admin link does not appear**
 
 The user's profile role is still `user`, the schema was not run, or the
