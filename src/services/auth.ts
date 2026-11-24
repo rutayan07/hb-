@@ -81,7 +81,25 @@ export async function startGoogleSignIn(): Promise<GoogleSignInResult> {
     return { status: 'cancelled' };
   }
 
-  const callbackParams = parseCallbackParams(result.url);
+  const completed = await completeOAuthRedirect(result.url);
+
+  if (!completed) {
+    throw new Error('Google sign-in did not return an authorization code.');
+  }
+
+  return { status: 'success' };
+}
+
+const handledCodes = new Set<string>();
+
+export function isOAuthCallbackUrl(url: string | null): url is string {
+  return Boolean(url && url.includes('auth/callback'));
+}
+
+// Exchanges the code from an OAuth callback URL for a session. Also used when
+// the app is reopened by the redirect link (Expo Go reloads the app).
+export async function completeOAuthRedirect(url: string): Promise<boolean> {
+  const callbackParams = parseCallbackParams(url);
   const oauthError =
     callbackParams.get('error_description') ?? callbackParams.get('error');
   const code = callbackParams.get('code');
@@ -91,8 +109,14 @@ export async function startGoogleSignIn(): Promise<GoogleSignInResult> {
   }
 
   if (!code) {
-    throw new Error('Google sign-in did not return an authorization code.');
+    return false;
   }
+
+  if (handledCodes.has(code)) {
+    return true;
+  }
+
+  handledCodes.add(code);
 
   const { error: exchangeError } =
     await supabase.auth.exchangeCodeForSession(code);
@@ -101,7 +125,7 @@ export async function startGoogleSignIn(): Promise<GoogleSignInResult> {
     throw exchangeError;
   }
 
-  return { status: 'success' };
+  return true;
 }
 
 export async function endSupabaseSession(): Promise<void> {

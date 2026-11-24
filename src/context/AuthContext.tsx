@@ -1,4 +1,6 @@
 import type { Session, User } from '@supabase/supabase-js';
+import * as Linking from 'expo-linking';
+import { Platform } from 'react-native';
 import {
   createContext,
   useCallback,
@@ -14,7 +16,12 @@ import {
   TEST_EMAILS,
   isSupabaseConfigured,
 } from '../config/env';
-import { endSupabaseSession, startGoogleSignIn } from '../services/auth';
+import {
+  completeOAuthRedirect,
+  endSupabaseSession,
+  isOAuthCallbackUrl,
+  startGoogleSignIn,
+} from '../services/auth';
 import { fetchProfile } from '../services/profiles';
 import { supabase } from '../services/supabase';
 import type { AuthStatus, Profile, UserRole } from '../types/auth';
@@ -171,6 +178,29 @@ export function AuthProvider({ children }: PropsWithChildren) {
       subscription.unsubscribe();
     };
   }, [applySession]);
+
+  useEffect(() => {
+    if (Platform.OS === 'web' || !isSupabaseConfigured) {
+      return;
+    }
+
+    const handleUrl = (url: string | null) => {
+      if (!isOAuthCallbackUrl(url)) {
+        return;
+      }
+
+      completeOAuthRedirect(url).catch((caughtError: unknown) => {
+        setError(getAuthErrorMessage(caughtError));
+      });
+    };
+
+    void Linking.getInitialURL().then(handleUrl);
+    const linkSubscription = Linking.addEventListener('url', ({ url }) =>
+      handleUrl(url),
+    );
+
+    return () => linkSubscription.remove();
+  }, []);
 
   const signInWithGoogle = useCallback(async () => {
     if (isSigningIn) {

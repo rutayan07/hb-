@@ -23,7 +23,7 @@ const linking: LinkingOptions<RootStackParamList> = {
   prefixes: [Linking.createURL('/')],
   config: {
     screens: {
-      Login: 'login',
+      Login: { path: 'login', alias: ['auth/callback'] },
       Dashboard: 'dashboard',
       Admin: 'admin',
     },
