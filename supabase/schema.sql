@@ -19,12 +19,16 @@ as $$
   select coalesce(lower(p_email), '') ~ '^[^@]+@hbplus\.fit$';
 $$;
 
-create or replace function public.is_admin()
+-- Kept outside the API-exposed public schema so it cannot be called over REST.
+create schema if not exists private;
+grant usage on schema private to authenticated;
+
+create or replace function private.is_admin()
 returns boolean
 language sql
 stable
 security definer
-set search_path = public
+set search_path = ''
 as $$
   select exists (
     select 1
@@ -35,8 +39,10 @@ as $$
   );
 $$;
 
-revoke all on function public.is_admin() from public;
-grant execute on function public.is_admin() to authenticated;
+revoke all on function private.is_admin() from public, anon;
+grant execute on function private.is_admin() to authenticated;
+
+drop function if exists public.is_admin();
 
 create or replace function public.handle_new_user()
 returns trigger
@@ -66,6 +72,8 @@ begin
 end;
 $$;
 
+revoke all on function public.handle_new_user() from public, anon, authenticated;
+
 drop trigger if exists on_auth_user_created on auth.users;
 
 create trigger on_auth_user_created
@@ -80,7 +88,7 @@ for select
 to authenticated
 using (
   public.is_allowed_email(email)
-  and (id = auth.uid() or public.is_admin())
+  and (id = (select auth.uid()) or private.is_admin())
 );
 
 insert into public.profiles (id, email, full_name, avatar_url)
