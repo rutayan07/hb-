@@ -131,11 +131,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, nextSession) => {
-      if (event === 'INITIAL_SESSION') {
-        return;
-      }
-
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       // Defer Supabase calls so the auth listener is not blocked.
       setTimeout(() => {
         if (isMounted) {

@@ -66,7 +66,7 @@ export function DashboardScreen() {
     <SafeAreaView style={styles.safeArea} edges={['top', 'right', 'left']}>
       <View style={styles.header}>
         <View style={styles.headerInner}>
-          <Brand showName={!isCompact} size={32} />
+          <Brand size={32} />
 
           <View style={styles.headerActions}>
             {isCompact ? (
