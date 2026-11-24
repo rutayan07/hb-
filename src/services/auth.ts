@@ -1,3 +1,5 @@
+import { isRunningInExpoGo } from 'expo';
+import Constants from 'expo-constants';
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 import { Platform } from 'react-native';
@@ -18,8 +20,13 @@ function getRedirectUrl(): string {
     return window.location.origin;
   }
 
-  // hbplus://auth/callback in app builds, exp://<host>/--/auth/callback in Expo Go.
-  return Linking.createURL('auth/callback');
+  // Expo Go can only receive exp:// links that point back at the dev server.
+  const hostUri = Constants.expoConfig?.hostUri;
+  if (isRunningInExpoGo() && hostUri) {
+    return `exp://${hostUri.replace(/\/+$/, '')}/--/auth/callback`;
+  }
+
+  return Linking.createURL('auth/callback', { scheme: 'hbplus' });
 }
 
 function parseCallbackParams(url: string): URLSearchParams {
@@ -40,6 +47,10 @@ function parseCallbackParams(url: string): URLSearchParams {
 
 export async function startGoogleSignIn(): Promise<GoogleSignInResult> {
   const redirectTo = getRedirectUrl();
+
+  if (__DEV__) {
+    console.info('[auth] OAuth redirect URL:', redirectTo);
+  }
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
