@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "HB Plus Portal",
+    "slug": "hb-plus-portal",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "hbplus",
+    "description": "Secure cross-platform portal with Google sign-in and domain-restricted access.",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.hbplus.portal"
+    },
+    "android": {
+      "package": "com.hbplus.portal",
+      "adaptiveIcon": {
+        "backgroundColor": "#173F6B",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": ["expo-web-browser"]
+  }
+}
