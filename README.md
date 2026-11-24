@@ -111,6 +111,12 @@ In [Google Cloud Console](https://console.cloud.google.com/):
 
 4. Copy the client ID and client secret.
 
+One **Web application** client is enough for web, Android, and iOS. The app
+never talks to Google directly: every platform opens Supabase's authorize URL,
+Google redirects back to Supabase, and Supabase redirects to the app. Separate
+Android/iOS OAuth clients are only needed for the native Google Sign-In SDK,
+which this project does not use.
+
 In Supabase, go to **Authentication > Sign In / Providers > Google**, enable
 Google, and paste the client ID and secret.
 
@@ -130,10 +136,16 @@ http://localhost:8081
 http://localhost:8081
 http://localhost:19006
 hbplus://auth/callback
+exp://**
+http://192.168.*.*:8081
 ```
 
-The `hbplus://auth/callback` entry is used by the Android and iOS development
-builds. Add your deployed web URL here as well when you deploy the app.
+- `hbplus://auth/callback` is used by Android and iOS builds.
+- `exp://**` is used when testing in Expo Go on a phone.
+- `http://192.168.*.*:8081` allows the web app to be opened from a phone on the
+  same Wi-Fi network.
+
+Add your deployed web URL here as well when you deploy the app.
 
 ### 5. Add environment variables
 
@@ -184,8 +196,23 @@ npm run ios
 ```
 
 The native scripts use `expo run`, which creates a development build with the
-`hbplus://` URL scheme. Expo Go is not sufficient for native Google sign-in
-because the OAuth redirect uses this custom scheme.
+`hbplus://` URL scheme.
+
+### Testing on a phone
+
+The quickest option is **Expo Go**:
+
+1. Install **Expo Go** from the Play Store or App Store.
+2. Connect the phone and computer to the same Wi-Fi network.
+3. Run `npx expo start` and scan the QR code (Expo Go on Android, Camera app on
+   iOS).
+4. Tap **Continue with Google**. The redirect returns to Expo Go through
+   `exp://<your-ip>:8081/--/auth/callback`, which is allowed by `exp://**`.
+
+If the phone cannot reach the computer, run `npx expo start --tunnel`.
+
+To test the web build in a phone browser, run `npx expo start --web --host lan`
+and open `http://<your-computer-ip>:8081` on the phone.
 
 ### 7. Create the first admin
 
@@ -205,7 +232,7 @@ Reload the app. The admin console link appears on the dashboard.
 1. The user taps **Continue with Google**.
 2. On web, the browser is redirected to Supabase's Google OAuth flow. On
    mobile, an in-app auth browser opens and returns through
-   `hbplus://auth/callback`.
+   `hbplus://auth/callback` (or the `exp://` URL in Expo Go).
 3. Supabase completes the OAuth exchange using PKCE and returns a session.
 4. `AuthProvider` verifies that the session came from Google with a confirmed
    email, then checks the email against the allowed domain.
@@ -337,9 +364,10 @@ redirect URI. The Supabase project must have `http://localhost:8081` (and
 
 **Native sign-in opens Google but does not return to the app**
 
-Make sure you are using a development build (`npm run android` or
-`npm run ios`), not Expo Go. Confirm `hbplus://auth/callback` is listed in
-Supabase's redirect URLs and that `scheme` in `app.json` is `hbplus`.
+Confirm `hbplus://auth/callback` (app builds) and `exp://**` (Expo Go) are
+listed in Supabase's redirect URLs and that `scheme` in `app.json` is `hbplus`.
+If Supabase does not recognize the redirect URL, it falls back to the Site URL
+and the in-app browser stays open.
 
 **The admin link does not appear**
 

@@ -1,7 +1,7 @@
+import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 import { Platform } from 'react-native';
 
-import { APP_SCHEME } from '../config/env';
 import { supabase } from './supabase';
 
 export type GoogleSignInResult =
@@ -18,7 +18,8 @@ function getRedirectUrl(): string {
     return window.location.origin;
   }
 
-  return `${APP_SCHEME}://auth/callback`;
+  // hbplus://auth/callback in app builds, exp://<host>/--/auth/callback in Expo Go.
+  return Linking.createURL('auth/callback');
 }
 
 function parseCallbackParams(url: string): URLSearchParams {

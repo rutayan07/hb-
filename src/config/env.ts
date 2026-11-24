@@ -12,8 +12,6 @@ const isPlaceholderKey = !supabaseAnonKey || supabaseAnonKey === 'your-anon-key'
 export const ALLOWED_DOMAIN =
   configuredDomain.toLowerCase().replace(/^@/, '') || 'hbplus.fit';
 
-export const APP_SCHEME = 'hbplus';
-
 export const isSupabaseConfigured = !isPlaceholderUrl && !isPlaceholderKey;
 
 export const missingEnvVars = [
