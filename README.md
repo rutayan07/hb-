@@ -234,6 +234,22 @@ where email = 'you@hbplus.fit';
 
 Reload the app. The admin console link appears on the dashboard.
 
+## Deployment
+
+The web build is deployed with Netlify:
+
+```bash
+npm run build:web
+npx netlify deploy --prod --dir=dist
+```
+
+`netlify.toml` sets the publish directory to `dist` and rewrites all routes to
+`index.html`, so `/dashboard` and `/admin` work when opened directly.
+
+The deployed origin must be listed in Supabase's **Redirect URLs**. Add
+`https://YOUR-SITE.netlify.app` under **Authentication > URL Configuration**,
+or Google sign-in will fall back to the Site URL.
+
 ## Authentication flow
 
 1. The user taps **Continue with Google**.
