@@ -236,7 +236,11 @@ Reload the app. The admin console link appears on the dashboard.
 
 ## Deployment
 
-The web build is deployed with Netlify:
+The web build is deployed on Netlify at
+<https://hb-plus-portal-809.netlify.app>. The site is linked to this GitHub
+repository, so every push to `main` builds and deploys automatically.
+
+For a manual deploy:
 
 ```bash
 npm run build:web
@@ -247,8 +251,8 @@ npx netlify deploy --prod --dir=dist
 `index.html`, so `/dashboard` and `/admin` work when opened directly.
 
 The deployed origin must be listed in Supabase's **Redirect URLs**. Add
-`https://YOUR-SITE.netlify.app` under **Authentication > URL Configuration**,
-or Google sign-in will fall back to the Site URL.
+`https://hb-plus-portal-809.netlify.app` under **Authentication > URL
+Configuration**, or Google sign-in will fall back to the Site URL.
 
 ## Authentication flow
 
